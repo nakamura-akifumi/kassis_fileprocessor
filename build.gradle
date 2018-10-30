@@ -2,6 +2,8 @@ buildscript {
 	ext {
 		kotlinVersion = '1.2.51'
 		springBootVersion = '2.0.6.RELEASE'
+        springBootDomaVersion = '1.1.1'
+        domaVersion = '2.19.0'
 	}
 	repositories {
 		mavenCentral()
@@ -10,6 +12,21 @@ buildscript {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
 		classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
 		classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
+	}
+}
+
+allprojects {
+	apply plugin: 'idea'
+	idea {
+		module {
+			outputDir file('build/classes/main')
+			testOutputDir file('build/classes/test')
+		}
+	}
+	if(project.convention.findPlugin(JavaPluginConvention)) {
+		// Change the output directory for the main and test source sets back to the old path
+		sourceSets.main.output.classesDir = new File(buildDir, "classes/main")
+		sourceSets.test.output.classesDir = new File(buildDir, "classes/test")
 	}
 }
 
@@ -22,6 +39,10 @@ apply plugin: 'io.spring.dependency-management'
 group = 'info.tmpz84.app'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
+
+processResources.destinationDir = compileJava.destinationDir
+compileJava.dependsOn processResources
+
 compileKotlin {
 	kotlinOptions {
 		freeCompilerArgs = ["-Xjsr305=strict"]
@@ -39,6 +60,9 @@ repositories {
 	mavenCentral()
 }
 
+test {
+    useJUnitPlatform()
+}
 
 dependencies {
 	implementation('org.springframework.boot:spring-boot-starter-amqp')
@@ -52,6 +76,14 @@ dependencies {
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
 	compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+"
 
-    compile group: 'org.apache.poi', name: 'poi', version: '3.9'
-    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.9'
+    compile group: 'org.apache.poi', name: 'poi', version: '4.0.0'
+    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.0.0'
+    compile group: 'com.monitorjbl', name: 'xlsx-streamer', version: '2.0.0'
+
+    compile "org.seasar.doma.boot:doma-spring-boot-starter:${springBootDomaVersion}"
+    compile "org.seasar.doma:doma:${domaVersion}"
+
+    testCompile("io.kotlintest:kotlintest-runner-junit5:3.1.8")
+    testCompile("io.kotlintest:kotlintest-extensions-spring:3.1.8")
+
 }

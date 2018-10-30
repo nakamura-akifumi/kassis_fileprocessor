@@ -5,8 +5,9 @@ import org.springframework.stereotype.Component
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import info.tmpz84.app.kassis.fileprocessor.ParseFile
-import info.tmpz84.app.kassis.fileprocessor.data.KassisFileMessage
-import info.tmpz84.app.kassis.fileprocessor.data.FileAdapter
+import info.tmpz84.app.kassis.fileprocessor.domain.data.KassisFileMessage
+import info.tmpz84.app.kassis.fileprocessor.domain.repository.UserRepository
+import org.springframework.beans.factory.annotation.Autowired
 
 @Component
 class Receiver {
