@@ -4,6 +4,7 @@ import info.tmpz84.app.kassis.fileprocessor.doma.dao.UserDao
 import info.tmpz84.app.kassis.fileprocessor.doma.entity.UserEntity
 import info.tmpz84.app.kassis.fileprocessor.domain.model.User
 import org.springframework.stereotype.Repository
+import java.sql.Timestamp
 
 @Repository
 class UserRepositoryDomaImpl (
@@ -35,6 +36,8 @@ class UserRepositoryDomaImpl (
 
     // ここでドメインのModel（Kotlin）をDomaのEntity（Java）をに詰め替える
     private fun _mapToDomaEntity(user: User): UserEntity {
+        val timestamp = Timestamp(System.currentTimeMillis());
+
         return UserEntity().also {
             it.id = user.id
             it.username = user.username
@@ -44,6 +47,8 @@ class UserRepositoryDomaImpl (
             it.full_name = user.full_name
             it.full_name_transcription = user.full_name_transcription
             it.note = user.note
+            it.created_at = timestamp
+            it.updated_at = timestamp
 
         }
     }

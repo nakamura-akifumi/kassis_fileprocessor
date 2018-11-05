@@ -35,13 +35,17 @@ apply plugin: 'kotlin-spring'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'kotlin-kapt'
 
+//mainClassName='AppKt'
 group = 'info.tmpz84.app'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
 
 processResources.destinationDir = compileJava.destinationDir
 compileJava.dependsOn processResources
+
+
 
 compileKotlin {
 	kotlinOptions {
@@ -58,6 +62,8 @@ compileTestKotlin {
 
 repositories {
 	mavenCentral()
+	mavenLocal()
+	maven {url 'https://oss.sonatype.org/content/repositories/snapshots/'}
 }
 
 test {
@@ -73,7 +79,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	runtimeOnly('org.springframework.boot:spring-boot-devtools')
 	runtimeOnly('org.postgresql:postgresql')
-	testImplementation('org.springframework.boot:spring-boot-starter-test')
+
 	compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+"
 
     compile group: 'org.apache.poi', name: 'poi', version: '4.0.0'
@@ -83,7 +89,14 @@ dependencies {
     compile "org.seasar.doma.boot:doma-spring-boot-starter:${springBootDomaVersion}"
     compile "org.seasar.doma:doma:${domaVersion}"
 
+
+	compile("io.kotlintest:kotlintest-runner-junit5:3.1.8")
+	compile("io.kotlintest:kotlintest-extensions-spring:3.1.8")
+	
+	
+	
     testCompile("io.kotlintest:kotlintest-runner-junit5:3.1.8")
     testCompile("io.kotlintest:kotlintest-extensions-spring:3.1.8")
+	testImplementation('org.springframework.boot:spring-boot-starter-test')
 
 }

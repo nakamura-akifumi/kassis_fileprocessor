@@ -4,10 +4,8 @@ import java.util.concurrent.CountDownLatch
 import org.springframework.stereotype.Component
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import info.tmpz84.app.kassis.fileprocessor.ParseFile
-import info.tmpz84.app.kassis.fileprocessor.domain.data.KassisFileMessage
-import info.tmpz84.app.kassis.fileprocessor.domain.repository.UserRepository
-import org.springframework.beans.factory.annotation.Autowired
+import info.tmpz84.app.kassis.fileprocessor.ParseFileImpl
+import info.tmpz84.app.kassis.fileprocessor.domain.model.KassisFileMessage
 
 @Component
 class Receiver {
@@ -25,7 +23,7 @@ class Receiver {
         println("filename: ${kassisFileMessage.blob.filename}")
         println("content_type: ${kassisFileMessage.blob.content_type}")
 
-        val parseFile = ParseFile()
+        val parseFile = ParseFileImpl()
         parseFile.parse(kassisFileMessage)
         latch.countDown()
     }

@@ -1,4 +1,4 @@
-package info.tmpz84.app.kassis_fileprocessor
+package info.tmpz84.app.kassis.fileprocessor
 
 import org.junit.Test
 import org.junit.runner.RunWith
