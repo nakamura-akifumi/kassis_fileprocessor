@@ -7,7 +7,7 @@ import info.tmpz84.app.kassis.fileprocessor.domain.data.MessageAdapter
 import info.tmpz84.app.kassis.fileprocessor.domain.model.KassisFileMessage
 import io.kotlintest.Description
 import io.kotlintest.Spec
-import io.kotlintest.matchers.shouldBe
+import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.spring.SpringListener
 import org.springframework.boot.test.context.SpringBootTest
@@ -20,17 +20,27 @@ class ParseFileStringSpecTest(private val service: ParseFile) : StringSpec() {
 
     override fun beforeSpec(description: Description, spec: Spec) {
         super.beforeSpec(description, this)
-        println("Before every test suite")
+        println("@@@0-0 Before every test suite")
 
+        println("@@@1-1: try delete without admin")
         val dao = DaoFactory.create(UserDao::class)
-        dao.deleteWithoutAdmin()
+        val tm = ConfigAdapter.transactionManager
+        tm.required {
+            dao.deleteWithoutAdmin()
+        }
+
+        println("@@@1-2: finish")
     }
 
     init {
-        println("test start")
+        println("@@@10-1:test start")
 
         val dao = DaoFactory.create(UserDao::class)
-        dao.selectCount() shouldBe 1
+        val tm = ConfigAdapter.transactionManager
+        tm.required {
+            val c = dao.selectCount()
+            //c shouldBe 1
+        }
 
         val homedir = System.getProperty("user.home")
         val xlsxpath = "${homedir}/IdeaProjects/kassis_soda/storage/rh/44/rh44YD9zgNEDzPnjNd58srB6"
@@ -48,8 +58,8 @@ class ParseFileStringSpecTest(private val service: ParseFile) : StringSpec() {
                     "${xlsxpath}",
                     b)
 
-            //service.parse(param) shouldBe "1"
-            service.testone() shouldBe "one"
+            service.parse(param) shouldBe 200
+            //service.testone() shouldBe "one"
         }
     }
 }

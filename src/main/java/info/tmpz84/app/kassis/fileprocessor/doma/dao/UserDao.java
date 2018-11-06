@@ -15,7 +15,7 @@ public interface UserDao {
     @Select
     UserEntity selectById(Integer id);
     @Select
-    int selectCount();
+    Long selectCount();
     @Insert
     int insert(UserEntity user);
     @Script

@@ -5,6 +5,7 @@ import info.tmpz84.app.kassis.fileprocessor.doma.entity.UserEntity
 import info.tmpz84.app.kassis.fileprocessor.domain.model.User
 import org.springframework.stereotype.Repository
 import java.sql.Timestamp
+import java.util.*
 
 @Repository
 class UserRepositoryDomaImpl (
@@ -37,6 +38,9 @@ class UserRepositoryDomaImpl (
     // ここでドメインのModel（Kotlin）をDomaのEntity（Java）をに詰め替える
     private fun _mapToDomaEntity(user: User): UserEntity {
         val timestamp = Timestamp(System.currentTimeMillis());
+        if (user.personid == null) {
+            user.personid = UUID.randomUUID().toString()
+        }
 
         return UserEntity().also {
             it.id = user.id

@@ -8,6 +8,7 @@ import info.tmpz84.app.kassis.fileprocessor.doma.repository.UserRepositoryDomaIm
 import info.tmpz84.app.kassis.fileprocessor.domain.DaoFactory
 import info.tmpz84.app.kassis.fileprocessor.domain.model.KassisFileMessage
 import info.tmpz84.app.kassis.fileprocessor.domain.model.User
+import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.usermodel.Workbook
 import org.springframework.stereotype.Component
@@ -35,52 +36,67 @@ class ParseFileImpl: ParseFile {
 
         val tm = ConfigAdapter.transactionManager
 
+        var maxcol:Int = 0
         var line:Int?
         var index:Int?
         var processLine:Int = 0
         for (sheet:Sheet in workbook) {
             line = 0
 
-            for (r in sheet) {
+            for (row in sheet) {
 
                 line++
                 if (line == 1) {
                     //タイトル行
                     index = 0
-                    for (c in r) {
-                        System.out.println(c.stringCellValue)
-                        index++
+                    for ((index, c) in row.withIndex()) {
+                        System.out.println("$index ${c.stringCellValue}")
+                        maxcol = index
                     }
+
                 } else {
+
                     //情報行
+                    var u = User()
                     index = 0
-                    var u:User = User()
-                    for (c in r) {
+                    for (index in 0..maxcol) {
+                        val cell = row.getCell(index)
+                        if (cell == null) {
+                            println("empty(null) ${index}")
+                            continue
+                        }
+                        System.out.println("$index ${cell.stringCellValue}")
+                        if (cell.stringCellValue.trim() == "" || cell.stringCellValue == null) {
+                            println("empty ${index}")
+                            continue
+                        }
                         when (index) {
                             0 -> {
-
+                                //Person ID
                             }
                             1 -> {
-                                u.username = c.stringCellValue
+                                u.username = cell.stringCellValue
+                                println("username:${index}:${cell.stringCellValue}")
                             }
                             2 -> {
-                                u.cardid = c.stringCellValue
+                                u.cardid = cell.stringCellValue
                             }
                             3 -> {
-                                u.full_name = c.stringCellValue
+                                u.full_name = cell.stringCellValue
+                                println("full_name:${index}:${cell.stringCellValue}")
                             }
                             4 -> {
-                                u.full_name_transcription = c.stringCellValue
+                                u.full_name_transcription = cell.stringCellValue
                             }
                             11 -> {
-                                u.email = c.stringCellValue
+                                u.email = cell.stringCellValue
+                                println("email:${index}:${cell.stringCellValue}")
                             }
                             else -> {
-                                println("else:${index}:${c.stringCellValue}")
+                                //println("else:${index}:${c.stringCellValue}")
                             }
                         }
 
-                        index++
                     }
 
                     tm.required {
