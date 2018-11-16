@@ -5,6 +5,7 @@ import info.tmpz84.app.kassis.fileprocessor.domain.DaoFactory
 import org.springframework.test.context.ContextConfiguration
 import info.tmpz84.app.kassis.fileprocessor.domain.data.MessageAdapter
 import info.tmpz84.app.kassis.fileprocessor.domain.model.KassisFileMessage
+import info.tmpz84.app.kassis.fileprocessor.domain.model.User
 import io.kotlintest.Description
 import io.kotlintest.Spec
 import io.kotlintest.shouldBe
@@ -29,6 +30,10 @@ class ParseFileStringSpecTest(private val service: ParseFile) : StringSpec() {
             dao.deleteWithoutAdmin()
         }
 
+        var user: User = User()
+        user.username = "usernamefoo"
+        user.password = "userpassword"
+
         println("@@@1-2: finish")
     }
 
@@ -43,12 +48,13 @@ class ParseFileStringSpecTest(private val service: ParseFile) : StringSpec() {
         }
 
         val homedir = System.getProperty("user.home")
-        val xlsxpath = "${homedir}/IdeaProjects/kassis_soda/storage/rh/44/rh44YD9zgNEDzPnjNd58srB6"
+        val xlsxpath = "${homedir}/IdeaProjects/kassis_soda/ext/sample/利用者登録3.xlsx"
+
 
         "executeでparamが1の場合oneが返る" {
             val b: MessageAdapter = MessageAdapter(
                     "rh44YD9zgNEDzPnjNd58srB6",
-                    "利用者登録2000.xlsx",
+                    "利用者登録3.xlsx",
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     "Xx4KczpeWHwSfFet1vxVvA==")
 
@@ -61,5 +67,6 @@ class ParseFileStringSpecTest(private val service: ParseFile) : StringSpec() {
             service.parse(param) shouldBe 200
             //service.testone() shouldBe "one"
         }
+
     }
 }

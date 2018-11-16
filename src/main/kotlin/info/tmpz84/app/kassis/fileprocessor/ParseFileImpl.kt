@@ -8,7 +8,6 @@ import info.tmpz84.app.kassis.fileprocessor.doma.repository.UserRepositoryDomaIm
 import info.tmpz84.app.kassis.fileprocessor.domain.DaoFactory
 import info.tmpz84.app.kassis.fileprocessor.domain.model.KassisFileMessage
 import info.tmpz84.app.kassis.fileprocessor.domain.model.User
-import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.usermodel.Workbook
 import org.springframework.stereotype.Component
@@ -21,7 +20,11 @@ class ParseFileImpl: ParseFile {
     override fun testone(): String {
         return "one"
     }
+
     override fun parse(kassisFileMessage: KassisFileMessage):Int {
+
+        val ldapService = LdapService()
+        ldapService.connect()
 
         val dao = DaoFactory.create(UserDao::class)
         val userRepository = UserRepositoryDomaImpl(dao)
@@ -76,21 +79,25 @@ class ParseFileImpl: ParseFile {
                             }
                             1 -> {
                                 u.username = cell.stringCellValue
-                                println("username:${index}:${cell.stringCellValue}")
+                                //println("username:${index}:${cell.stringCellValue}")
                             }
                             2 -> {
                                 u.cardid = cell.stringCellValue
                             }
                             3 -> {
                                 u.full_name = cell.stringCellValue
-                                println("full_name:${index}:${cell.stringCellValue}")
+                                //println("full_name:${index}:${cell.stringCellValue}")
                             }
                             4 -> {
                                 u.full_name_transcription = cell.stringCellValue
                             }
+                            10 -> {
+                                u.password = cell.stringCellValue
+                                println("password:${index}:${cell.stringCellValue}")
+                            }
                             11 -> {
                                 u.email = cell.stringCellValue
-                                println("email:${index}:${cell.stringCellValue}")
+                                //println("email:${index}:${cell.stringCellValue}")
                             }
                             else -> {
                                 //println("else:${index}:${c.stringCellValue}")
@@ -101,12 +108,18 @@ class ParseFileImpl: ParseFile {
 
                     tm.required {
                         userRepository.create(u)
+                        if (u?.username != null) {
+                            println("password=${u.password}")
+                            ldapService.create(u)
+                        }
                         processLine++
                     }
                 }
 
             }
         }
+
+        ldapService.disconnect()
 
         return processLine
 

@@ -8,5 +8,6 @@ data class User(
         var cardid: String? = null,
         var full_name: String? = "",
         var full_name_transcription: String? = "",
-        var note: String? = ""
+        var note: String? = "",
+        var password: String? = ""
         )
