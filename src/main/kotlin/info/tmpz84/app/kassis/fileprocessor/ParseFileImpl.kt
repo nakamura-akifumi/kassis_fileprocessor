@@ -10,11 +10,14 @@ import info.tmpz84.app.kassis.fileprocessor.domain.model.KassisFileMessage
 import info.tmpz84.app.kassis.fileprocessor.domain.model.User
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.usermodel.Workbook
+import org.springframework.boot.SpringBootConfiguration
 import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import java.io.FileInputStream
 
 
-@Component
+@SpringBootConfiguration
+@Service
 class ParseFileImpl: ParseFile {
 
     override fun testone(): String {

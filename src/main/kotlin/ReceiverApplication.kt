@@ -1,5 +1,4 @@
-package info.tmpz84.app.kassis.fileprocessor.recv
-
+import org.slf4j.LoggerFactory
 import org.springframework.amqp.core.Binding
 import org.springframework.amqp.core.BindingBuilder
 import org.springframework.amqp.core.Queue
@@ -9,13 +8,17 @@ import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
-import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.SpringBootConfiguration
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.context.annotation.Bean
 
-@SpringBootApplication
+@SpringBootConfiguration
+@EnableAutoConfiguration
 class ReceiverApplication : CommandLineRunner {
 
-    val topicExchangeName = "kassis-exchange"
+    private val logger = LoggerFactory.getLogger(javaClass)
+    internal val queueName = "kassis_soda_development"
+    internal val topicExchangeName = "kassis-exchange"
 
     @Bean
     fun queue(): Queue {
@@ -47,19 +50,11 @@ class ReceiverApplication : CommandLineRunner {
         return MessageListenerAdapter(receiver, "receiveMessage")
     }
 
-    @Throws(Exception::class)
-    override fun run(vararg args: String) {
-        // 止めるまで待機
-        println("Start Receiver. QueName: $queueName")
+    override fun run(vararg args: String?) {
+        logger.info("Start Receiver. queueName: $queueName")
     }
+}
 
-    companion object {
-        @Throws(InterruptedException::class)
-        @JvmStatic
-        fun main(args: Array<String>) {
-            SpringApplication.run(ReceiverApplication::class.java, *args)
-        }
-
-        internal val queueName = "kassis_soda_development"
-    }
+fun main(args: Array<String>) {
+    SpringApplication.run(ReceiverApplication::class.java, *args)
 }

@@ -1,5 +1,3 @@
-package info.tmpz84.app.kassis.fileprocessor.recv
-
 import java.util.concurrent.CountDownLatch
 import org.springframework.stereotype.Component
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper

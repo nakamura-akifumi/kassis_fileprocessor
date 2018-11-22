@@ -1,9 +1,9 @@
 buildscript {
 	ext {
-		kotlinVersion = '1.2.51'
-		springBootVersion = '2.0.6.RELEASE'
+		kotlinVersion = '1.2.70'
+		springBootVersion = '2.1.0.RELEASE'
         springBootDomaVersion = '1.1.1'
-        domaVersion = '2.19.0'
+        domaVersion = '2.19.3'
 	}
 	repositories {
 		mavenCentral()
@@ -19,12 +19,12 @@ allprojects {
 	apply plugin: 'idea'
 	idea {
 		module {
+			inheritOutputDirs = false
 			outputDir file('build/classes/main')
 			testOutputDir file('build/classes/test')
 		}
 	}
-	if(project.convention.findPlugin(JavaPluginConvention)) {
-		// Change the output directory for the main and test source sets back to the old path
+	if (project.convention.findPlugin(JavaPluginConvention)) {
 		sourceSets.main.output.classesDir = new File(buildDir, "classes/main")
 		sourceSets.test.output.classesDir = new File(buildDir, "classes/test")
 	}
@@ -45,8 +45,6 @@ sourceCompatibility = 1.8
 processResources.destinationDir = compileJava.destinationDir
 compileJava.dependsOn processResources
 
-
-
 compileKotlin {
 	kotlinOptions {
 		freeCompilerArgs = ["-Xjsr305=strict"]
@@ -63,7 +61,6 @@ compileTestKotlin {
 repositories {
 	mavenCentral()
 	mavenLocal()
-	maven {url 'https://oss.sonatype.org/content/repositories/snapshots/'}
 }
 
 test {
@@ -72,9 +69,6 @@ test {
 
 dependencies {
 	implementation('org.springframework.boot:spring-boot-starter-amqp')
-	implementation('org.springframework.boot:spring-boot-starter-data-elasticsearch')
-	implementation('org.springframework.boot:spring-boot-starter-data-redis')
-	implementation('org.springframework.boot:spring-boot-starter-mail')
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	runtimeOnly('org.springframework.boot:spring-boot-devtools')
@@ -89,12 +83,15 @@ dependencies {
     compile "org.seasar.doma.boot:doma-spring-boot-starter:${springBootDomaVersion}"
     compile "org.seasar.doma:doma:${domaVersion}"
 
+	testCompile('org.springframework.boot:spring-boot-starter-test') {
+		exclude module: 'junit'
+	}
+	testImplementation('org.junit.jupiter:junit-jupiter-api')
+	testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine')
 
-	compile("io.kotlintest:kotlintest-runner-junit5:3.1.8")
-	compile("io.kotlintest:kotlintest-extensions-spring:3.1.8")
+	testCompile("org.assertj:assertj-core:3.11.1")
+}
 
-    testCompile("io.kotlintest:kotlintest-runner-junit5:3.1.8")
-    testCompile("io.kotlintest:kotlintest-extensions-spring:3.1.8")
-	testImplementation('org.springframework.boot:spring-boot-starter-test')
-
+task wrapper(type: Wrapper) {
+	gradleVersion = '4.10'
 }
