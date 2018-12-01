@@ -7,8 +7,6 @@ import org.springframework.stereotype.Repository
 import java.sql.Timestamp
 import java.util.*
 
-
-
 @Repository
 class UserRepositoryDomaImpl (
         private val userDao: UserDao) {

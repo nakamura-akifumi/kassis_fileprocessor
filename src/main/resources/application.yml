@@ -1,0 +1,8 @@
+spring:
+  dataSource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/kassis_soda_development
+
+doma:
+  dialect: postgres
+  sql-file-repository: no_cache

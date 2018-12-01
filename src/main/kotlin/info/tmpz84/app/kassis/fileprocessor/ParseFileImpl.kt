@@ -3,34 +3,126 @@ package info.tmpz84.app.kassis.fileprocessor
 import java.io.File
 import java.io.InputStream
 import com.monitorjbl.xlsx.StreamingReader;
+import com.rabbitmq.client.ConnectionFactory
+import info.tmpz84.app.kassis.fileprocessor.doma.dao.MessageAdapterDao
 import info.tmpz84.app.kassis.fileprocessor.doma.dao.UserDao
+import info.tmpz84.app.kassis.fileprocessor.doma.repository.MessageAdapterRepositoryDomaImpl
 import info.tmpz84.app.kassis.fileprocessor.doma.repository.UserRepositoryDomaImpl
 import info.tmpz84.app.kassis.fileprocessor.domain.DaoFactory
-import info.tmpz84.app.kassis.fileprocessor.domain.model.KassisFileMessage
-import info.tmpz84.app.kassis.fileprocessor.domain.model.User
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.usermodel.Workbook
+import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringBootConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import java.io.FileInputStream
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.rabbitmq.client.Connection
+import info.tmpz84.app.kassis.fileprocessor.doma.dao.MessageHistoryDao
+import info.tmpz84.app.kassis.fileprocessor.doma.repository.MessageHistoryRepositoryDomaImpl
+import info.tmpz84.app.kassis.fileprocessor.domain.model.*
 
 
-@SpringBootConfiguration
+@Configuration
 @Service
 class ParseFileImpl: ParseFile {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    lateinit var ampqConnection: Connection
 
     override fun testone(): String {
         return "one"
     }
 
-    override fun parse(kassisFileMessage: KassisFileMessage):Int {
+    override fun parseManager(kassisFileMessage: KassisFileMessage): Int {
+
+        // TODO: 設定ファイルから読み込む
+        val sendQueueName = "kassis_soda_development"
+        //val factory = ConnectionFactory()
+        //factory.host = "localhost"
+        //val connection = factory.newConnection()
+        val channel = ampqConnection.createChannel()
+
+        channel.exchangeDeclare("messageExchange", "topic")
+
+        val dao = DaoFactory.create(MessageAdapterDao::class)
+        val repo = MessageAdapterRepositoryDomaImpl(dao)
+        val tm = ConfigAdapter.transactionManager
+        var messageAdapter: MessageAdapter
+        tm.required {
+            messageAdapter = repo.selectByMsgId(kassisFileMessage.msgid)
+            /*
+            if (messageAdapter == null) {
+                logger.warn("can not find message_adapter. msgId:${kassisFileMessage.msgid}")
+                //return 0
+            }
+            */
+            // TODO: status = set だけ対応するか
+            // TODO: 要リファクタリング
+            // state: set -> (accepted) -> processing -> processed
+            // status: normal -> error or sucess
+            messageAdapter.state = "processing"
+            repo.update(messageAdapter)
+        }
+
+        val mapper = ObjectMapper()
+        var msgObj = KassisFileProcessMessage(
+                kassisFileMessage.msgid,
+                "processing",
+                "インポート処理を開始しました。",
+                -1F,
+                0,
+                0
+                )
+
+        var json = mapper.writeValueAsString(msgObj)
+
+        channel.basicPublish("messageExchange",
+                "kassis.file.replay_messages.${kassisFileMessage.msgid}",
+                null,
+                json.toByteArray())
+
+        val lines = parseExcelFile(kassisFileMessage)
+
+        tm.required {
+            messageAdapter = repo.selectByMsgId(kassisFileMessage.msgid)
+
+            messageAdapter.state = "processed"
+            messageAdapter.status = "sucess"
+            repo.update(messageAdapter)
+        }
+        msgObj = KassisFileProcessMessage(
+                kassisFileMessage.msgid,
+                "completed",
+                "インポート処理を完了しました。",
+                -1F,
+                0,
+                0
+        )
+
+        json = mapper.writeValueAsString(msgObj)
+
+        channel.basicPublish("messageExchange",
+                "kassis.file.replay_messages",
+                null,
+                json.toByteArray())
+
+        return lines
+    }
+
+    override fun parseExcelFile(kassisFileMessage: KassisFileMessage):Int {
 
         val ldapService = LdapService()
         ldapService.connect()
 
-        val dao = DaoFactory.create(UserDao::class)
-        val userRepository = UserRepositoryDomaImpl(dao)
+        val userDao = DaoFactory.create(UserDao::class)
+        val userRepository = UserRepositoryDomaImpl(userDao)
+
+        val historyDao = DaoFactory.create(MessageHistoryDao::class)
+        val historyRepository = MessageHistoryRepositoryDomaImpl(historyDao)
 
         val filefullpath:String = kassisFileMessage.filepath
 
@@ -42,10 +134,9 @@ class ParseFileImpl: ParseFile {
 
         val tm = ConfigAdapter.transactionManager
 
-        var maxcol:Int = 0
+        var maxcol = 0
         var line:Int?
-        var index:Int?
-        var processLine:Int = 0
+        var processLine = 0
         for (sheet:Sheet in workbook) {
             line = 0
 
@@ -54,7 +145,6 @@ class ParseFileImpl: ParseFile {
                 line++
                 if (line == 1) {
                     //タイトル行
-                    index = 0
                     for ((index, c) in row.withIndex()) {
                         System.out.println("$index ${c.stringCellValue}")
                         maxcol = index
@@ -64,7 +154,6 @@ class ParseFileImpl: ParseFile {
 
                     //情報行
                     var u = User()
-                    index = 0
                     for (index in 0..maxcol) {
                         val cell = row.getCell(index)
                         if (cell == null) {
@@ -127,5 +216,4 @@ class ParseFileImpl: ParseFile {
         return processLine
 
     }
-
 }

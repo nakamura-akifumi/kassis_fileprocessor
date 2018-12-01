@@ -5,7 +5,7 @@ import org.seasar.doma.Domain
 
 @Domain(valueType = String::class)
 @JsonIgnoreProperties(ignoreUnknown=true)
-data class MessageAdapter(val key:String,
+data class MessageBlob(val key:String,
                           val filename:String,
                           val content_type:String,
                           val checksum:String)

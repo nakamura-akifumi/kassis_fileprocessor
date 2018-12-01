@@ -2,7 +2,8 @@ package info.tmpz84.app.kassis.fileprocessor
 
 import info.tmpz84.app.kassis.fileprocessor.doma.dao.UserDao
 import info.tmpz84.app.kassis.fileprocessor.domain.DaoFactory
-import info.tmpz84.app.kassis.fileprocessor.domain.data.MessageAdapter
+import info.tmpz84.app.kassis.fileprocessor.domain.data.MessageBlob
+import info.tmpz84.app.kassis.fileprocessor.domain.model.MessageAdapter
 import info.tmpz84.app.kassis.fileprocessor.domain.model.KassisFileMessage
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -11,6 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
+import java.io.File
+import java.sql.Timestamp
+
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
@@ -38,14 +42,17 @@ class ParseFileTest {
     @Test
     fun someCreateTest() {
 
-        val homedir = System.getProperty("user.home")
-        val xlsxpath = "${homedir}/IdeaProjects/kassis_soda/ext/sample/利用者登録3.xlsx"
+        val file = File("src/test/resources/利用者登録サンプル.xlsx")
+        val xlsxpath = file.getCanonicalPath()
 
-        val b: MessageAdapter = MessageAdapter(
-                "rh44YD9zgNEDzPnjNd58srB6",
-                "利用者登録3.xlsx",
+        val timestamp_now = Timestamp(System.currentTimeMillis())
+
+        val b: MessageBlob = MessageBlob(
+                "",
+                "",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                "Xx4KczpeWHwSfFet1vxVvA==")
+                ""
+        )
 
         val param: KassisFileMessage
                 = KassisFileMessage(
@@ -53,7 +60,7 @@ class ParseFileTest {
                 "${xlsxpath}",
                 b)
 
-        assertEquals(3, service.parse(param))
+        assertEquals(4, service.parseManager(param))
 
     }
 }

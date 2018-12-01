@@ -15,6 +15,11 @@ Linux系OSかMacOSで動くはずです。
 ## 動作方法
 
 （記載予定）
+```
+git clone https://github.com/nakamura-akifumi/kassis_fileprocessor.git
+cd kassis_fileprocessor
+gradle bootRun
+```
 
 ## メモ
 
