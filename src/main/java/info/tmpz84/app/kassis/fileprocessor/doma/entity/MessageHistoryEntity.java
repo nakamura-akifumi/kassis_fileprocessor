@@ -17,6 +17,7 @@ public class MessageHistoryEntity {
     public String message_type;
     public String status;
     public String note;
+    public String note2;
 
     public Timestamp created_at;
     public Timestamp updated_at;

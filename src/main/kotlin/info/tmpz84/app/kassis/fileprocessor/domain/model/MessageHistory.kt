@@ -5,7 +5,8 @@ data class MessageHistory(
 
         val msgid: String,
         val row: String,
-        val message_type: String,
-        val status: String,
-        val note: String
+        val message_type: String = "",
+        val status: String  = "",
+        val note: String,
+        val note2: String
         )

@@ -30,8 +30,11 @@ import info.tmpz84.app.kassis.fileprocessor.domain.model.*
 class ParseFileImpl: ParseFile {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+    private val exchangeName = "messageExchange"
 
-    lateinit var ampqConnection: Connection
+    lateinit var amqpConnection: Connection
+
+
 
     override fun testone(): String {
         return "one"
@@ -44,7 +47,7 @@ class ParseFileImpl: ParseFile {
         //val factory = ConnectionFactory()
         //factory.host = "localhost"
         //val connection = factory.newConnection()
-        val channel = ampqConnection.createChannel()
+        val channel = amqpConnection.createChannel()
 
         channel.exchangeDeclare("messageExchange", "topic")
 
@@ -80,7 +83,7 @@ class ParseFileImpl: ParseFile {
 
         var json = mapper.writeValueAsString(msgObj)
 
-        channel.basicPublish("messageExchange",
+        channel.basicPublish(exchangeName,
                 "kassis.file.replay_messages.${kassisFileMessage.msgid}",
                 null,
                 json.toByteArray())
@@ -91,7 +94,7 @@ class ParseFileImpl: ParseFile {
             messageAdapter = repo.selectByMsgId(kassisFileMessage.msgid)
 
             messageAdapter.state = "processed"
-            messageAdapter.status = "sucess"
+            messageAdapter.status = "success"
             repo.update(messageAdapter)
         }
         msgObj = KassisFileProcessMessage(
@@ -105,7 +108,7 @@ class ParseFileImpl: ParseFile {
 
         json = mapper.writeValueAsString(msgObj)
 
-        channel.basicPublish("messageExchange",
+        channel.basicPublish(exchangeName,
                 "kassis.file.replay_messages",
                 null,
                 json.toByteArray())
@@ -134,6 +137,11 @@ class ParseFileImpl: ParseFile {
 
         val tm = ConfigAdapter.transactionManager
 
+        val channel = amqpConnection.createChannel()
+        channel.exchangeDeclare("messageExchange", "topic")
+
+        val msgId = kassisFileMessage.msgid
+
         var maxcol = 0
         var line:Int?
         var processLine = 0
@@ -157,12 +165,10 @@ class ParseFileImpl: ParseFile {
                     for (index in 0..maxcol) {
                         val cell = row.getCell(index)
                         if (cell == null) {
-                            println("empty(null) ${index}")
                             continue
                         }
-                        System.out.println("$index ${cell.stringCellValue}")
                         if (cell.stringCellValue.trim() == "" || cell.stringCellValue == null) {
-                            println("empty ${index}")
+                            //println("empty ${index}")
                             continue
                         }
                         when (index) {
@@ -185,7 +191,7 @@ class ParseFileImpl: ParseFile {
                             }
                             10 -> {
                                 u.password = cell.stringCellValue
-                                println("password:${index}:${cell.stringCellValue}")
+                                //println("password:${index}:${cell.stringCellValue}")
                             }
                             11 -> {
                                 u.email = cell.stringCellValue
@@ -199,18 +205,55 @@ class ParseFileImpl: ParseFile {
                     }
 
                     tm.required {
-                        userRepository.create(u)
-                        if (u?.username != null) {
-                            println("password=${u.password}")
-                            ldapService.create(u)
+                        try {
+                            userRepository.create(u)
+
+                            if (u?.username != null) {
+                                println("password=${u.password}")
+                                ldapService.create(u)
+                            }
+                        }
+                        catch (e: org.seasar.doma.jdbc.UniqueConstraintException) {
+                            tm.setRollbackOnly()
+                            logger.info("${line} 行目で一意制約違反エラーが発生しました。")
+                            //logger.info(e.localizedMessage)
+
+                            // TODO: ここでやるとエラーになるから
+                            val note = "${line} 行目で一意制約違反エラーが発生しました。"
+                            val note2 = e.localizedMessage
+                            val mhistory
+                                    = MessageHistory(msgid = msgId,
+                                                     row = Integer.toString(processLine),
+                                                     note = note,
+                                                     note2 = note2)
+
+                            //historyRepository.create(mhistory)
                         }
                         processLine++
+
+                        var msgObj = KassisFileProcessMessage(
+                                kassisFileMessage.msgid,
+                                "processing",
+                                "${processLine} 処理中です。",
+                                -1F,
+                                processLine,
+                                0
+                        )
+
+                        val mapper = ObjectMapper()
+                        var json = mapper.writeValueAsString(msgObj)
+
+                        channel.basicPublish("messageExchange",
+                                "kassis.file.replay_messages.${kassisFileMessage.msgid}",
+                                null,
+                                json.toByteArray())
                     }
                 }
 
             }
         }
 
+        // TODO: finnaly とかで実行する
         ldapService.disconnect()
 
         return processLine

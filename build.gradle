@@ -105,6 +105,6 @@ task wrapper(type: Wrapper) {
 }
 
 bootRun {
-	System.setProperty("kassis.bootDir", new File(".").getAbsoluteFile().getParent());
+	System.setProperty("kassis.bootDir", new File(".").getAbsoluteFile().getParent())
 	systemProperties = System.properties
-}x
+}

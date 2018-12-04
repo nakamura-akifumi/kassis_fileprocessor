@@ -19,6 +19,8 @@ Linux系OSかMacOSで動くはずです。
 git clone https://github.com/nakamura-akifumi/kassis_fileprocessor.git
 cd kassis_fileprocessor
 gradle bootRun
+
+gradle bootConsole
 ```
 
 ## メモ

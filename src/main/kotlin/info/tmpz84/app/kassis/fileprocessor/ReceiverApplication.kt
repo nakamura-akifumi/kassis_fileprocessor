@@ -27,7 +27,7 @@ class ReceiverApplication : CommandLineRunner {
 
         logger.info("Start ReceiverApplication. queueName: $queueName")
 
-        val x:String = System.getProperty("kassis.bootDir","false")
+        //val x:String = System.getProperty("kassis.bootDir","false")
 
         val factory = ConnectionFactory()
         factory.host = "localhost"
@@ -51,7 +51,7 @@ class ReceiverApplication : CommandLineRunner {
                 logger.info("content_type: ${kassisFileMessage.blob.content_type}")
 
                 val parseFile = ParseFileImpl()
-                parseFile.ampqConnection = connection
+                parseFile.amqpConnection = connection
                 parseFile.parseManager(kassisFileMessage)
 
 
