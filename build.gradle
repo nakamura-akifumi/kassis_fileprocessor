@@ -87,6 +87,7 @@ dependencies {
     compile group: 'org.apache.poi', name: 'poi', version: '4.0.0'
     compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.0.0'
     compile group: 'com.monitorjbl', name: 'xlsx-streamer', version: '2.0.0'
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8'
 
     compile "org.seasar.doma.boot:doma-spring-boot-starter:${springBootDomaVersion}"
     compile "org.seasar.doma:doma:${domaVersion}"

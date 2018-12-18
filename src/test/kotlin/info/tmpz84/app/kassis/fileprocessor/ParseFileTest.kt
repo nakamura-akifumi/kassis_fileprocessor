@@ -3,8 +3,7 @@ package info.tmpz84.app.kassis.fileprocessor
 import info.tmpz84.app.kassis.fileprocessor.doma.dao.UserDao
 import info.tmpz84.app.kassis.fileprocessor.domain.DaoFactory
 import info.tmpz84.app.kassis.fileprocessor.domain.data.MessageBlob
-import info.tmpz84.app.kassis.fileprocessor.domain.model.MessageAdapter
-import info.tmpz84.app.kassis.fileprocessor.domain.model.KassisFileMessage
+import info.tmpz84.app.kassis.fileprocessor.domain.data.KassisFileMessage
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

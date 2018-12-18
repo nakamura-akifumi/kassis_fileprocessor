@@ -1,4 +1,4 @@
-package info.tmpz84.app.kassis.fileprocessor.domain.model
+package info.tmpz84.app.kassis.fileprocessor.domain.data
 
 data class KassisFileProcessMessage(
         val msgid:String,

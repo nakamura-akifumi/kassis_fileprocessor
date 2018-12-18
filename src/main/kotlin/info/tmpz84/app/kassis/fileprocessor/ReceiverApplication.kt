@@ -6,10 +6,7 @@ import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.DefaultConsumer
 import com.rabbitmq.client.Envelope
-import info.tmpz84.app.kassis.fileprocessor.doma.dao.MessageAdapterDao
-import info.tmpz84.app.kassis.fileprocessor.doma.repository.MessageAdapterRepositoryDomaImpl
-import info.tmpz84.app.kassis.fileprocessor.domain.DaoFactory
-import info.tmpz84.app.kassis.fileprocessor.domain.model.KassisFileMessage
+import info.tmpz84.app.kassis.fileprocessor.domain.data.KassisFileMessage
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
@@ -46,13 +43,26 @@ class ReceiverApplication : CommandLineRunner {
 
                 logger.info("Received <$json>")
                 logger.info("msgid: ${kassisFileMessage.msgid}")
+                logger.info("message_type: ${kassisFileMessage.message_type}")
                 logger.info("filepath: ${kassisFileMessage.filepath}")
-                logger.info("filename: ${kassisFileMessage.blob.filename}")
-                logger.info("content_type: ${kassisFileMessage.blob.content_type}")
 
-                val parseFile = ParseFileImpl()
-                parseFile.amqpConnection = connection
-                parseFile.parseManager(kassisFileMessage)
+                if (kassisFileMessage.blob != null) {
+                    logger.info("filename: ${kassisFileMessage.blob.filename}")
+                    logger.info("content_type: ${kassisFileMessage.blob.content_type}")
+                }
+
+                when (kassisFileMessage.message_type) {
+                    "user.file.import" -> {
+                        val parseFile = ParseFileImpl()
+                        parseFile.amqpConnection = connection
+                        parseFile.parseManager(kassisFileMessage)
+                    }
+                    "user.file.export" -> {
+                        val parseFile = ParseFileImpl()
+                        parseFile.amqpConnection = connection
+                        parseFile.buildManager(kassisFileMessage)
+                    }
+                }
 
 
             }

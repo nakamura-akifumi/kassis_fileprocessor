@@ -2,6 +2,8 @@ spring:
   dataSource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/kassis_soda_development
+    username: postgres
+    password: postgres
 
 doma:
   dialect: postgres

@@ -8,5 +8,5 @@ data class MessageHistory(
         val message_type: String = "",
         val status: String  = "",
         val note: String,
-        val note2: String
+        val note2: String?
         )

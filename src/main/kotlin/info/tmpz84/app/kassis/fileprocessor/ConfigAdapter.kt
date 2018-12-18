@@ -10,8 +10,11 @@ object ConfigAdapter : Config {
 
     private val dialect = PostgresDialect()
 
+    // TODO: application.ymlから読む
     private val dataSource = LocalTransactionDataSource(
-            "jdbc:postgresql://localhost:5432/kassis_soda_development", null, null)
+            "jdbc:postgresql://localhost:5432/kassis_soda_development",
+            "postgres",
+            "postgres")
 
     private val transactionManager = LocalTransactionManager(
             dataSource.getLocalTransaction(jdbcLogger))
